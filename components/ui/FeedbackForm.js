@@ -1,6 +1,36 @@
+import { AppContext } from '@/pages/_app';
 import Image from 'next/image';
+import { useContext, useState } from 'react';
 
 export default function FeedbackForm() {
+
+  const { setSubmitted } = useContext(AppContext);
+
+  const [data, setData] = useState({
+    name: '',
+    feedback: '',
+  });
+
+  function handleChange(e) {
+    setData({ ...data, [e.target.name]: e.target.value });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+  
+    try {
+      await fetch('api/mailtrap', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data),
+      })
+        .then((res) => res.json())
+        .then(() => setSubmitted(true));
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <div className="grid lg:grid-cols-2 min-h-[80vh] place-items-center">
       <div className="bg-[#1e26ff8c] w-full h-96 md:h-full relative">
@@ -21,7 +51,11 @@ export default function FeedbackForm() {
             Fill out the form below and we'll be in touch as soon as possible
           </p>
         </div>
-        <form className="grid gap-16">
+        <form
+          className="grid gap-16"
+          onSubmit={handleSubmit}
+          onChange={handleChange}
+        >
           <div className="border-2 border-[#434058] rounded-2xl p-4">
             <input
               type="text"
